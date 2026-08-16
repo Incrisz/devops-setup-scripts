@@ -6,7 +6,7 @@
 set -e
 export DEBIAN_FRONTEND=noninteractive
 
-DOMAIN="wordp.bmp.com.ng"
+DOMAIN="ng-sou.cyfamod.com"
 DB_NAME="wordpress"
 DB_USER="wordpress_user"
 DB_PASSWORD=$(openssl rand -hex 24)
@@ -20,6 +20,15 @@ PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 systemctl enable --now nginx
 systemctl enable --now mariadb
 systemctl enable --now php${PHP_VERSION}-fpm
+
+# Allow WordPress to upload files up to 128 MB.
+PHP_INI="/etc/php/$PHP_VERSION/fpm/php.ini"
+sed -i "s/^upload_max_filesize = .*/upload_max_filesize = 128M/" "$PHP_INI"
+sed -i "s/^post_max_size = .*/post_max_size = 140M/" "$PHP_INI"
+sed -i "s/^memory_limit = .*/memory_limit = 256M/" "$PHP_INI"
+sed -i "s/^max_execution_time = .*/max_execution_time = 300/" "$PHP_INI"
+sed -i "s/^max_input_time = .*/max_input_time = 300/" "$PHP_INI"
+systemctl reload php${PHP_VERSION}-fpm
 
 # Remove MariaDB's default test data and create the WordPress database.
 mariadb -e "DELETE FROM mysql.user WHERE User='';"
@@ -65,7 +74,7 @@ server {
     root /var/www/wordpress;
     index index.php index.html;
 
-    client_max_body_size 64M;
+    client_max_body_size 140M;
 
     location / {
         try_files \$uri \$uri/ /index.php?\$args;
