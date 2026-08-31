@@ -52,6 +52,10 @@ scrape_configs:
   - job_name: "prometheus"
     static_configs:
       - targets: ["localhost:9090"]
+
+  - job_name: "node"
+    static_configs:
+      - targets: ["localhost:9100"]
 EOF
 
 # Allow root to edit the configuration and allow the prometheus service to read it.
@@ -103,4 +107,3 @@ rm -rf /tmp/prometheus-3.14.0.linux-amd64
 
 # Print the address the learner should open in a web browser.
 echo "Open Prometheus at http://YOUR_SERVER_IP:9090"
-
